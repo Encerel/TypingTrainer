@@ -1,38 +1,40 @@
-package by.yankavets.typingtrainer.service;
+package by.yankavets.typingtrainer.service.impl;
 
 import by.yankavets.typingtrainer.model.entity.User;
 import by.yankavets.typingtrainer.repository.UserRepository;
-import by.yankavets.typingtrainer.security.UserDetailsImpl;
+import by.yankavets.typingtrainer.service.UserService;
+import org.hibernate.sql.ast.tree.expression.Collation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 
 @Service
-@Transactional
-public class UserDetailsServiceImpl implements UserDetailsService {
+@Transactional(readOnly = true)
+public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
     @Autowired
-    public UserDetailsServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
+
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public void save(User user) {
 
-        Optional<User> userFromDB = userRepository.findUsersByEmail(username);
+    }
 
-        if (userFromDB.isEmpty()) {
-            throw new UsernameNotFoundException(String.format("User with %s not found", username));
-        }
+    @Override
+    public void register(User user) {
 
-
-        return new UserDetailsImpl(userFromDB.get());
     }
 }

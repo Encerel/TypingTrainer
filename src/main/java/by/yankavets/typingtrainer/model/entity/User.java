@@ -1,10 +1,9 @@
 package by.yankavets.typingtrainer.model.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
+import lombok.*;
 
 @Entity
 @Table(name = "\"user\"")
@@ -12,6 +11,7 @@ import lombok.ToString;
 @Setter
 @NoArgsConstructor
 @ToString
+@RequiredArgsConstructor
 public class User {
 
     @Id
@@ -20,14 +20,15 @@ public class User {
     private long id;
 
     @Column(name = "email")
+    @Email(message = "Incorrect email")
+    @NotEmpty(message = "Email should not be empty")
+    @NonNull
     private String email;
 
     @Column(name = "password")
+    @NotEmpty(message = "Password should not be empty")
+    @NonNull
     private String password;
 
-    public User(long id, String email, String password) {
-        this.id = id;
-        this.email = email;
-        this.password = password;
-    }
+
 }
