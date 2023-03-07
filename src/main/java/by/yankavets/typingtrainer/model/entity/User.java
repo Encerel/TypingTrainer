@@ -1,5 +1,6 @@
 package by.yankavets.typingtrainer.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -28,6 +29,7 @@ public class User {
     @Column(name = "password")
     @NotEmpty(message = "Password should not be empty")
     @NonNull
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
 

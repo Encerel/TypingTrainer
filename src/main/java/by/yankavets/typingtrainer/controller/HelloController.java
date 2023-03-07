@@ -13,6 +13,7 @@ public class HelloController {
 
     @GetMapping("/hello")
     public Map<String, String> hello() {
+
         Map<String, String> json = new HashMap<>();
         json.put("message", "Hello from protected controller method");
         return json;
