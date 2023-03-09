@@ -1,5 +1,6 @@
 package by.yankavets.typingtrainer.security;
 
+import by.yankavets.typingtrainer.exception.user.IncorrectCredentialsException;
 import by.yankavets.typingtrainer.model.entity.User;
 import by.yankavets.typingtrainer.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,7 @@ public class TypingTrainerUsernamePasswordAuthProvider implements Authentication
         Optional<User> userFromDB = userRepository.findByEmail(username);
 
         if (userFromDB.isEmpty()) {
-            throw new BadCredentialsException("No user registered with such details");
+            throw new IncorrectCredentialsException("No user registered with such details");
         }
 
         User user = userFromDB.get();
@@ -44,10 +45,9 @@ public class TypingTrainerUsernamePasswordAuthProvider implements Authentication
         if (passwordEncoder.matches(password, user.getPassword())) {
             List<GrantedAuthority> authorities = new ArrayList<>();
             authorities.add(new SimpleGrantedAuthority("User"));
-            UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password, authorities);
-            return token;
+            return new UsernamePasswordAuthenticationToken(username, password, authorities);
         } else {
-            throw new BadCredentialsException("Invalid password");
+            throw new IncorrectCredentialsException("Invalid password");
         }
     }
 

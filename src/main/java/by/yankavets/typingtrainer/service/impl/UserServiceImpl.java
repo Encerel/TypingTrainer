@@ -28,15 +28,6 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    @Override
-    public void save(User user) {
-
-    }
-
-    @Override
-    public void register(User user) {
-
-    }
 
     @Override
     public Optional<User> findByEmail(String email) {

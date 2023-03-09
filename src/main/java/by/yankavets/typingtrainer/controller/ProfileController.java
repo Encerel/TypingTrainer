@@ -1,6 +1,5 @@
 package by.yankavets.typingtrainer.controller;
 
-import by.yankavets.typingtrainer.model.dto.LoginUserDTO;
 import by.yankavets.typingtrainer.model.entity.User;
 import by.yankavets.typingtrainer.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
