@@ -6,5 +6,5 @@ import org.springframework.validation.BindingResult;
 
 public interface RegistrationService {
 
-    void register(RegisterUserDTO registerUserDTO, BindingResult bindingResult);
+    User register(RegisterUserDTO registerUserDTO, BindingResult bindingResult);
 }

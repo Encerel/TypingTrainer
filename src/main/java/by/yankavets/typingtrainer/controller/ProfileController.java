@@ -21,8 +21,8 @@ public class ProfileController {
     }
 
     @GetMapping
-    public User profile(Authentication authentication) {
-        return userService.findByEmail(authentication.getName()).orElse(null);
+    public String profile() {
+        return "You come to secure endpoint using JWT token";
     }
 
 }

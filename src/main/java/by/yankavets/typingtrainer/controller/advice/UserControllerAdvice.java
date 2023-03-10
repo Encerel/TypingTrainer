@@ -26,21 +26,6 @@ public class UserControllerAdvice {
         return new ResponseEntity<>(serverResponse, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(IncorrectPasswordException.class)
-    public ResponseEntity<ServerResponse> handleIncorrectPasswordException(
-            IncorrectPasswordException exception
-    ) {
-        ServerResponse serverResponse = new AdviceErrorMessage(exception.getMessage(), HttpStatus.UNAUTHORIZED.value());
-        return new ResponseEntity<>(serverResponse, HttpStatus.UNAUTHORIZED);
-    }
-
-    @ExceptionHandler(UserIsExistException.class)
-    public ResponseEntity<ServerResponse> handleUserIsExistException(
-            UserIsExistException exception
-    ) {
-        ServerResponse serverResponse = new AdviceErrorMessage(exception.getMessage(), HttpStatus.CONFLICT.value());
-        return new ResponseEntity<>(serverResponse, HttpStatus.CONFLICT);
-    }
 
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<ServerResponse> handleUsernameNotFoundException(UsernameNotFoundException exception) {
@@ -48,9 +33,5 @@ public class UserControllerAdvice {
         return new ResponseEntity<>(serverResponse, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(IncorrectCredentialsException.class)
-    public ResponseEntity<ServerResponse> handleIncorrectCredentialsException(IncorrectCredentialsException exception) {
-        ServerResponse serverResponse = new AdviceErrorMessage(exception.getMessage(), HttpStatus.UNAUTHORIZED.value());
-        return new ResponseEntity<>(serverResponse, HttpStatus.UNAUTHORIZED);
-    }
+
 }

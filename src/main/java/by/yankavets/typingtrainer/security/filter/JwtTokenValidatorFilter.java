@@ -1,69 +1,74 @@
 package by.yankavets.typingtrainer.security.filter;
 
+import by.yankavets.typingtrainer.constants.SecurityConstant;
+import by.yankavets.typingtrainer.exception.ExceptionMessage;
+import by.yankavets.typingtrainer.exception.auth.InvalidJWTTokenException;
+import by.yankavets.typingtrainer.exception.auth.JwtTokenIsExpireException;
 import by.yankavets.typingtrainer.model.entity.User;
-import by.yankavets.typingtrainer.security.JWTUtil;
+import by.yankavets.typingtrainer.security.JwtService;
 import by.yankavets.typingtrainer.service.UserService;
-import com.auth0.jwt.exceptions.JWTVerificationException;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Optional;
 
 @Component
-public class JWTTokenValidationFilter extends OncePerRequestFilter {
+public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 
-    private final JWTUtil jwtUtil;
+    private final JwtService jwtService;
     private final UserService userService;
 
     @Autowired
-    public JWTTokenValidationFilter(JWTUtil jwtUtil, UserService userService) {
-        this.jwtUtil = jwtUtil;
+    public JwtTokenValidatorFilter(JwtService jwtService, UserService userService) {
+        this.jwtService = jwtService;
         this.userService = userService;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        String authHeader = request.getHeader("Authorization");
+        String authHeader = request.getHeader(SecurityConstant.AUTH_HEADER);
 
-        if (authHeader != null && !authHeader.isBlank() && authHeader.startsWith("Bearer ")) {
+        if (authHeader != null && !authHeader.isBlank() && authHeader.startsWith(SecurityConstant.BEARER_HEADER)) {
             String jwt = authHeader.substring(7);
 
 
             if (jwt.isBlank()) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid JWT Token in Bearer Header");
-            } else {
+                throw new InvalidJWTTokenException();
+            }
 
-                try {
 
-                    String username = jwtUtil.validateToken(jwt);
-                    Optional<User> userOptional = userService.findByEmail(username);
+                String userEmail = jwtService.extractUsername(jwt);
+                User userFromDB = userService.findByEmail(userEmail);
+
+                if (jwtService.isValidToken(jwt, userFromDB)) {
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(
-                                    userOptional.get().getEmail()
-                                    ,userOptional.get().getPassword(),
-                                    Collections.singleton(new SimpleGrantedAuthority("USER")));
+                                    userFromDB.getEmail(),
+                                    null,
+                                    userFromDB.getAuthorities()
+                            );
 
                     if (SecurityContextHolder.getContext().getAuthentication() == null) {
                         SecurityContextHolder.getContext().setAuthentication(authToken);
                     }
-                } catch (JWTVerificationException e) {
-                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid JWT Token in Bearer Header");
                 }
-            }
 
         }
         filterChain.doFilter(request, response);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return request.getServletPath().equals("/auth/login");
     }
 
 }

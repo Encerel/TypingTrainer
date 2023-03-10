@@ -1,22 +1,17 @@
 package by.yankavets.typingtrainer.config;
 
-import by.yankavets.typingtrainer.security.CustomSuccessHandler;
-import by.yankavets.typingtrainer.security.filter.JWTTokenValidationFilter;
-import by.yankavets.typingtrainer.service.UserService;
+import by.yankavets.typingtrainer.security.filter.JwtTokenGeneratorFilter;
+import by.yankavets.typingtrainer.security.filter.JwtTokenValidatorFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -30,11 +25,13 @@ public class SecurityConfiguration {
 
 
 
-    private final JWTTokenValidationFilter jwtFilter;
+    private final JwtTokenValidatorFilter jwtTokenValidatorFilter;
+    private final JwtTokenGeneratorFilter jwtTokenGeneratorFilter;
 
     @Autowired
-    public SecurityConfiguration(JWTTokenValidationFilter jwtFilter) {
-        this.jwtFilter = jwtFilter;
+    public SecurityConfiguration(JwtTokenValidatorFilter jwtTokenValidatorFilter, JwtTokenGeneratorFilter jwtTokenGeneratorFilter) {
+        this.jwtTokenValidatorFilter = jwtTokenValidatorFilter;
+        this.jwtTokenGeneratorFilter = jwtTokenGeneratorFilter;
     }
 
 
@@ -61,7 +58,8 @@ public class SecurityConfiguration {
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtTokenValidatorFilter, BasicAuthenticationFilter.class)
+                .addFilterAfter(jwtTokenGeneratorFilter,  BasicAuthenticationFilter.class)
                 .httpBasic();
 
         return http.build();

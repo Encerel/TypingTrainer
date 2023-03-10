@@ -1,11 +1,11 @@
 package by.yankavets.typingtrainer.security;
 
-import by.yankavets.typingtrainer.exception.user.IncorrectCredentialsException;
+import by.yankavets.typingtrainer.exception.ExceptionMessage;
+import by.yankavets.typingtrainer.exception.auth.IncorrectCredentialsException;
 import by.yankavets.typingtrainer.model.entity.User;
 import by.yankavets.typingtrainer.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -37,17 +37,15 @@ public class TypingTrainerUsernamePasswordAuthProvider implements Authentication
         Optional<User> userFromDB = userRepository.findByEmail(username);
 
         if (userFromDB.isEmpty()) {
-            throw new IncorrectCredentialsException("No user registered with such details");
+            throw new IncorrectCredentialsException(ExceptionMessage.WRONG_EMAIL);
         }
 
         User user = userFromDB.get();
 
         if (passwordEncoder.matches(password, user.getPassword())) {
-            List<GrantedAuthority> authorities = new ArrayList<>();
-            authorities.add(new SimpleGrantedAuthority("User"));
-            return new UsernamePasswordAuthenticationToken(username, password, authorities);
+            return new UsernamePasswordAuthenticationToken(username, password, user.getAuthorities());
         } else {
-            throw new IncorrectCredentialsException("Invalid password");
+            throw new IncorrectCredentialsException(ExceptionMessage.WRONG_PASSWORD);
         }
     }
 

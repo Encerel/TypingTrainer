@@ -1,5 +1,7 @@
 package by.yankavets.typingtrainer.service.impl;
 
+import by.yankavets.typingtrainer.exception.ExceptionMessage;
+import by.yankavets.typingtrainer.exception.user.UserNotFoundException;
 import by.yankavets.typingtrainer.model.entity.User;
 import by.yankavets.typingtrainer.repository.UserRepository;
 import by.yankavets.typingtrainer.service.UserService;
@@ -30,7 +32,10 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public User findByEmail(String email) {
+
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+
+        return optionalUser.orElseThrow(() -> new UsernameNotFoundException(ExceptionMessage.WRONG_EMAIL));
     }
 }
