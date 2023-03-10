@@ -4,6 +4,7 @@ import by.yankavets.typingtrainer.model.dto.UserDTO;
 import by.yankavets.typingtrainer.model.entity.Role;
 import by.yankavets.typingtrainer.model.entity.payload.ServerResponse;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -24,13 +25,12 @@ import java.util.Set;
 @Getter
 @Setter
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AuthenticationResponse implements ServerResponse {
 
 
     private UserDTO userDTO;
     private String message;
-
-//    private String jwtToken;
     private int status;
 
 

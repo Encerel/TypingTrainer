@@ -1,5 +1,6 @@
 package by.yankavets.typingtrainer.config;
 
+import by.yankavets.typingtrainer.security.BasicAuthEntryPoint;
 import by.yankavets.typingtrainer.security.filter.JwtTokenGeneratorFilter;
 import by.yankavets.typingtrainer.security.filter.JwtTokenValidatorFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -28,8 +30,10 @@ public class SecurityConfiguration {
     private final JwtTokenValidatorFilter jwtTokenValidatorFilter;
     private final JwtTokenGeneratorFilter jwtTokenGeneratorFilter;
 
+
     @Autowired
-    public SecurityConfiguration(JwtTokenValidatorFilter jwtTokenValidatorFilter, JwtTokenGeneratorFilter jwtTokenGeneratorFilter) {
+    public SecurityConfiguration(JwtTokenValidatorFilter jwtTokenValidatorFilter,
+                                 JwtTokenGeneratorFilter jwtTokenGeneratorFilter) {
         this.jwtTokenValidatorFilter = jwtTokenValidatorFilter;
         this.jwtTokenGeneratorFilter = jwtTokenGeneratorFilter;
     }
@@ -81,7 +85,6 @@ public class SecurityConfiguration {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
 
 
 

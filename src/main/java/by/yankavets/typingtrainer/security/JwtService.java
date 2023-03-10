@@ -38,7 +38,7 @@ public class JwtService {
             Map<String, Object> extraClaims,
             UserDetails userDetails
     ) {
-        Date expirationDate = Date.from(ZonedDateTime.now().plusSeconds(1).toInstant());
+        Date expirationDate = Date.from(ZonedDateTime.now().plusSeconds(60).toInstant());
 
         return Jwts.builder()
                 .setClaims(extraClaims)

@@ -14,7 +14,10 @@ public class UserControllerAdvice {
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ServerResponse> handleNotFoundUserException(UserNotFoundException exception) {
-        ServerResponse serverResponse = new AdviceErrorMessage(exception.getMessage(), HttpStatus.NOT_FOUND.value());
+        ServerResponse serverResponse = AdviceErrorMessage.builder()
+                .message(exception.getMessage())
+                .status(HttpStatus.NOT_FOUND.value())
+                .build();
         return new ResponseEntity<>(serverResponse, HttpStatus.NOT_FOUND);
     }
 
@@ -22,16 +25,14 @@ public class UserControllerAdvice {
     public ResponseEntity<ServerResponse> handleUserNotCreatedException(
             UserNotCreatedException exception
     ) {
-        ServerResponse serverResponse = new AdviceErrorMessage(exception.getMessage(), HttpStatus.BAD_REQUEST.value());
+        ServerResponse serverResponse = AdviceErrorMessage.builder()
+                .message(exception.getMessage())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .build();
         return new ResponseEntity<>(serverResponse, HttpStatus.BAD_REQUEST);
     }
 
 
-    @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<ServerResponse> handleUsernameNotFoundException(UsernameNotFoundException exception) {
-        ServerResponse serverResponse = new AdviceErrorMessage(exception.getMessage(), HttpStatus.NOT_FOUND.value());
-        return new ResponseEntity<>(serverResponse, HttpStatus.NOT_FOUND);
-    }
 
 
 }

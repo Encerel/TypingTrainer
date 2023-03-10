@@ -1,5 +1,6 @@
 package by.yankavets.typingtrainer.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
@@ -12,6 +13,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class RegisterUserDTO {
 
     @NotEmpty(message = "Name should not be empty!")
@@ -22,7 +24,7 @@ public class RegisterUserDTO {
     @NotEmpty(message = "Email should not be empty!")
     private String email;
 
-    @JsonProperty(access = JsonProperty.Access.READ_WRITE)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @NotEmpty(message = "Password should not be empty")
     private String password;
 
