@@ -1,7 +1,5 @@
 package by.yankavets.typingtrainer.config;
 
-import by.yankavets.typingtrainer.security.BasicAuthEntryPoint;
-import by.yankavets.typingtrainer.security.filter.JwtTokenGeneratorFilter;
 import by.yankavets.typingtrainer.security.filter.JwtTokenValidatorFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -28,14 +26,11 @@ public class SecurityConfiguration {
 
 
     private final JwtTokenValidatorFilter jwtTokenValidatorFilter;
-    private final JwtTokenGeneratorFilter jwtTokenGeneratorFilter;
 
 
     @Autowired
-    public SecurityConfiguration(JwtTokenValidatorFilter jwtTokenValidatorFilter,
-                                 JwtTokenGeneratorFilter jwtTokenGeneratorFilter) {
+    public SecurityConfiguration(JwtTokenValidatorFilter jwtTokenValidatorFilter) {
         this.jwtTokenValidatorFilter = jwtTokenValidatorFilter;
-        this.jwtTokenGeneratorFilter = jwtTokenGeneratorFilter;
     }
 
 
@@ -63,7 +58,6 @@ public class SecurityConfiguration {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .addFilterBefore(jwtTokenValidatorFilter, BasicAuthenticationFilter.class)
-                .addFilterAfter(jwtTokenGeneratorFilter,  BasicAuthenticationFilter.class)
                 .httpBasic();
 
         return http.build();

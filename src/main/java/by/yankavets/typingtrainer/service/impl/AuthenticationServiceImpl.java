@@ -6,6 +6,7 @@ import by.yankavets.typingtrainer.model.entity.User;
 import by.yankavets.typingtrainer.model.entity.payload.ServerResponse;
 import by.yankavets.typingtrainer.model.entity.payload.response.AuthenticationResponse;
 import by.yankavets.typingtrainer.repository.UserRepository;
+import by.yankavets.typingtrainer.security.JwtService;
 import by.yankavets.typingtrainer.service.AuthenticationService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +27,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final ModelMapper modelMapper;
 
+    private final JwtService jwtService;
+
     @Autowired
-    public AuthenticationServiceImpl(UserRepository userRepository, ModelMapper modelMapper) {
+    public AuthenticationServiceImpl(UserRepository userRepository, ModelMapper modelMapper, JwtService jwtService) {
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
+        this.jwtService = jwtService;
     }
 
     @Override
@@ -57,6 +61,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .builder()
                 .userDTO(modelMapper.map(foundUser, UserDTO.class))
                 .status(HttpStatus.OK.value())
+                .jwtToken(jwtService.generateToken(foundUser))
                 .build();
 
 

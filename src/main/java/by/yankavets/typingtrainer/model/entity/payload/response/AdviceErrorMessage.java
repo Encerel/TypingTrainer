@@ -18,10 +18,7 @@ import java.time.format.DateTimeFormatter;
 public class AdviceErrorMessage implements ServerResponse {
 
     private String message;
-    private String timestamp;
-
     private int status;
-    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd:MM:yyyy hh:mm:ss");
 
 
 }

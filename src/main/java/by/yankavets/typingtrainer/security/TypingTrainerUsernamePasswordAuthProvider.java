@@ -4,21 +4,19 @@ import by.yankavets.typingtrainer.exception.ExceptionMessage;
 import by.yankavets.typingtrainer.exception.auth.IncorrectCredentialsException;
 import by.yankavets.typingtrainer.model.entity.User;
 import by.yankavets.typingtrainer.repository.UserRepository;
-import org.hibernate.internal.util.ExceptionHelper;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
 import java.util.Optional;
 
 @Component
@@ -28,7 +26,6 @@ public class TypingTrainerUsernamePasswordAuthProvider implements Authentication
     private final PasswordEncoder passwordEncoder;
 
 
-    private HandlerExceptionResolver resolver;
 
     @Autowired
     public TypingTrainerUsernamePasswordAuthProvider(UserRepository userRepository, PasswordEncoder passwordEncoder) {
@@ -59,4 +56,7 @@ public class TypingTrainerUsernamePasswordAuthProvider implements Authentication
     public boolean supports(Class<?> authentication) {
         return (UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication));
     }
+
+
 }
+

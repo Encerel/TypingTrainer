@@ -37,9 +37,10 @@ public class AuthController {
 
         registrationService.register(registerUserDTO, bindingResult);
 
-        ServerResponse response = new RegistrationResponse(
-                SuccessfulMessage.MESSAGE_USER_CREATED_SUCCESSFUL.getMessage()
-        );
+        ServerResponse response = RegistrationResponse.builder()
+                .message(SuccessfulMessage.MESSAGE_USER_CREATED_SUCCESSFUL.getMessage())
+                .status(HttpStatus.CREATED.value())
+                .build();
 
         return ResponseEntity.ok(response);
     }

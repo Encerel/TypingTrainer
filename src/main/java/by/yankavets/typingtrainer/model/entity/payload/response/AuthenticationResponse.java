@@ -33,6 +33,8 @@ public class AuthenticationResponse implements ServerResponse {
     private String message;
     private int status;
 
+    private String jwtToken;
+
 
 
 }

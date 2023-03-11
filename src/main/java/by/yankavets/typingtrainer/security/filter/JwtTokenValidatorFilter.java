@@ -69,6 +69,7 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
                     if (SecurityContextHolder.getContext().getAuthentication() == null) {
                         SecurityContextHolder.getContext().setAuthentication(authToken);
                         filterChain.doFilter(request, response);
+
                     }
                 }
 
@@ -82,7 +83,8 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return request.getServletPath().equals("/auth/login");
+        return request.getServletPath().equals("/auth/login")
+                || request.getServletPath().equals("/auth/register");
     }
 
 
