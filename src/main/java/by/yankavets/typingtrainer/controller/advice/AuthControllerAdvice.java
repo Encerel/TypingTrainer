@@ -10,6 +10,8 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.security.SignatureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -21,6 +23,28 @@ public class AuthControllerAdvice {
     @ExceptionHandler(IncorrectCredentialsException.class)
     public ResponseEntity<ServerResponse> handleIncorrectCredentialsException(
             IncorrectCredentialsException exception
+    ) {
+        ServerResponse serverResponse = AdviceErrorMessage.builder()
+                .message(exception.getMessage())
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .build();
+        return new ResponseEntity<>(serverResponse, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ServerResponse> handleIncorrectCredentialsException(
+            BadCredentialsException exception
+    ) {
+        ServerResponse serverResponse = AdviceErrorMessage.builder()
+                .message(exception.getMessage())
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .build();
+        return new ResponseEntity<>(serverResponse, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ServerResponse> handleIncorrectCredentialsException(
+            AuthenticationException exception
     ) {
         ServerResponse serverResponse = AdviceErrorMessage.builder()
                 .message(exception.getMessage())
@@ -63,6 +87,7 @@ public class AuthControllerAdvice {
 
         return new ResponseEntity<>(serverResponse, HttpStatus.UNAUTHORIZED);
     }
+
 
 
 

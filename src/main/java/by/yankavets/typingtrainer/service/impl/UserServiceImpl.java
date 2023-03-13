@@ -38,4 +38,6 @@ public class UserServiceImpl implements UserService {
 
         return optionalUser.orElseThrow(() -> new UsernameNotFoundException(ExceptionMessage.WRONG_EMAIL));
     }
+
+
 }

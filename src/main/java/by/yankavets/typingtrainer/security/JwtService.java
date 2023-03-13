@@ -1,14 +1,12 @@
 package by.yankavets.typingtrainer.security;
 
 import by.yankavets.typingtrainer.constants.SecurityConstant;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
-
+import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
@@ -18,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-@Component
+@Service
 public class JwtService {
 
     @Value("${jwt_secret}")
@@ -29,8 +27,6 @@ public class JwtService {
     }
 
     public String extractUsername(String token) {
-
-
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -38,7 +34,7 @@ public class JwtService {
             Map<String, Object> extraClaims,
             UserDetails userDetails
     ) {
-        Date expirationDate = Date.from(ZonedDateTime.now().plusSeconds(60).toInstant());
+        Date expirationDate = Date.from(ZonedDateTime.now().plusYears(1).toInstant());
 
         return Jwts.builder()
                 .setClaims(extraClaims)

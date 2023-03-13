@@ -1,5 +1,6 @@
 package by.yankavets.typingtrainer.controller;
 
+import by.yankavets.typingtrainer.model.dto.LoginUserDTO;
 import by.yankavets.typingtrainer.model.dto.RegisterUserDTO;
 import by.yankavets.typingtrainer.model.entity.payload.ServerResponse;
 import by.yankavets.typingtrainer.model.entity.payload.response.RegistrationResponse;
@@ -10,6 +11,8 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,6 +26,8 @@ public class AuthController {
 
     private final RegistrationService registrationService;
     private final AuthenticationService authenticationService;
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
 
     @Autowired
@@ -48,13 +53,12 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<ServerResponse> login(Authentication authentication) {
 
+
         return authenticationService.authenticate(authentication);
     }
 
     @PostMapping("/activateAccount")
     public ResponseEntity<ServerResponse> getActivationCode(@RequestBody String email) {
-
-
 
         return ResponseEntity.ok(new SuccessfulMessage("All is success", HttpStatus.OK.value()));
 

@@ -2,12 +2,14 @@ package by.yankavets.typingtrainer.security;
 
 import by.yankavets.typingtrainer.exception.ExceptionMessage;
 import by.yankavets.typingtrainer.exception.auth.IncorrectCredentialsException;
+import by.yankavets.typingtrainer.exception.auth.IncorrectPasswordException;
 import by.yankavets.typingtrainer.model.entity.User;
 import by.yankavets.typingtrainer.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -33,14 +35,14 @@ public class TypingTrainerUsernamePasswordAuthProvider implements Authentication
         this.passwordEncoder = passwordEncoder;
     }
 
-    @Override
+//    @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String username = authentication.getName().strip();
         String password = authentication.getCredentials().toString().strip();
         Optional<User> userFromDB = userRepository.findByEmail(username);
 
         if (userFromDB.isEmpty()) {
-            throw new IncorrectCredentialsException(ExceptionMessage.WRONG_EMAIL);
+            throw new BadCredentialsException(ExceptionMessage.WRONG_EMAIL);
         }
 
         User user = userFromDB.get();
@@ -48,11 +50,11 @@ public class TypingTrainerUsernamePasswordAuthProvider implements Authentication
         if (passwordEncoder.matches(password, user.getPassword())) {
             return new UsernamePasswordAuthenticationToken(username, password, user.getAuthorities());
         } else {
-            throw new IncorrectCredentialsException(ExceptionMessage.WRONG_PASSWORD);
+            throw new BadCredentialsException(ExceptionMessage.WRONG_PASSWORD);
         }
     }
 
-    @Override
+//    @Override
     public boolean supports(Class<?> authentication) {
         return (UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication));
     }

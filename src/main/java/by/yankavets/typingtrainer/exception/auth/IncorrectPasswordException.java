@@ -1,6 +1,8 @@
 package by.yankavets.typingtrainer.exception.auth;
 
-public class IncorrectPasswordException extends RuntimeException {
+import org.springframework.security.core.AuthenticationException;
+
+public class IncorrectPasswordException extends AuthenticationException {
 
     public IncorrectPasswordException(String message) {
         super(message);
