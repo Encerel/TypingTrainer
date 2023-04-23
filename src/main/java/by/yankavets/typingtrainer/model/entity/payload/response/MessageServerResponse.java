@@ -6,12 +6,12 @@ import lombok.*;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
-public class RegistrationResponse implements ServerResponse {
+public class MessageServerResponse implements ServerResponse {
+
     private String message;
     private int status;
-    private String confirmationToken;
 
 }

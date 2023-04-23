@@ -1,0 +1,34 @@
+spring:
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        show_sql: 'true'
+
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: 'true'
+
+  mail:
+    host: smtp.gmail.com
+    username: typingtrainerofficial@gmail.com
+    port: 587
+    password: ${email-password}
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+        debug: true
+    test-connection: false
+    protocol: smtp
+
+  datasource:
+    password: ${db-password}
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    url: jdbc:postgresql://localhost:5432/typing_trainer
+jwt_secret: ${jwt-secret}

@@ -1,4 +1,4 @@
-package by.yankavets.typingtrainer.model.entity;
+package by.yankavets.typingtrainer.model.entity.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -14,7 +14,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 @Entity
-@Table(name = "\"user\"")
+@Table(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -51,6 +51,12 @@ public class User implements UserDetails {
     @Temporal(TemporalType.DATE)
     private LocalDate createdAt;
 
+    @Column(name = "locked")
+    private boolean locked;
+
+    @Column(name = "enabled")
+    private boolean enabled;
+
 
     @Override
     @JsonIgnore
@@ -77,7 +83,7 @@ public class User implements UserDetails {
     @Override
     @JsonIgnore
     public boolean isAccountNonLocked() {
-        return true;
+        return !locked;
     }
 
     @Override
@@ -89,6 +95,6 @@ public class User implements UserDetails {
     @Override
     @JsonIgnore
     public boolean isEnabled() {
-        return true;
+        return enabled;
     }
 }

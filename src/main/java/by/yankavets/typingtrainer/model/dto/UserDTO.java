@@ -1,6 +1,6 @@
 package by.yankavets.typingtrainer.model.dto;
 
-import by.yankavets.typingtrainer.model.entity.Role;
+import by.yankavets.typingtrainer.model.entity.user.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;

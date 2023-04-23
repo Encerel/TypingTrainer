@@ -1,4 +1,4 @@
-package by.yankavets.typingtrainer.model.entity;
+package by.yankavets.typingtrainer.model.entity.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -17,7 +17,6 @@ public class Role {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
     private int id;
 
     @Column(name = "name")

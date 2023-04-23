@@ -1,12 +1,8 @@
 package by.yankavets.typingtrainer.security;
 
-import by.yankavets.typingtrainer.exception.ExceptionMessage;
-import by.yankavets.typingtrainer.exception.auth.IncorrectCredentialsException;
-import by.yankavets.typingtrainer.exception.auth.IncorrectPasswordException;
-import by.yankavets.typingtrainer.model.entity.User;
+import by.yankavets.typingtrainer.constant.ExceptionMessage;
+import by.yankavets.typingtrainer.model.entity.user.User;
 import by.yankavets.typingtrainer.repository.UserRepository;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -15,10 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.servlet.HandlerExceptionResolver;
 
-import java.io.IOException;
 import java.util.Optional;
 
 @Component

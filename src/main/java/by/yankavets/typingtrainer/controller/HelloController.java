@@ -18,4 +18,6 @@ public class HelloController {
         json.put("message", "Hello from protected controller method");
         return json;
     }
+
+
 }

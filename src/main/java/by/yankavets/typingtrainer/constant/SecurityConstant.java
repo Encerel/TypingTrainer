@@ -1,11 +1,7 @@
-package by.yankavets.typingtrainer.constants;
+package by.yankavets.typingtrainer.constant;
 
-import org.springframework.beans.factory.annotation.Value;
 
 public final class SecurityConstant {
-
-    @Value("${jwt_secret}")
-    public static String SECRET_KEY;
 
     public static final String AUTH_HEADER = "Authorization";
 

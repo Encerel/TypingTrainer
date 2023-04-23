@@ -1,29 +1,19 @@
 package by.yankavets.typingtrainer.security.filter;
 
-import by.yankavets.typingtrainer.constants.SecurityConstant;
-import by.yankavets.typingtrainer.exception.ExceptionMessage;
-import by.yankavets.typingtrainer.exception.auth.InvalidJWTTokenException;
-import by.yankavets.typingtrainer.model.entity.User;
-import by.yankavets.typingtrainer.model.entity.payload.ServerResponse;
-import by.yankavets.typingtrainer.model.entity.payload.response.AdviceErrorMessage;
-import by.yankavets.typingtrainer.security.JwtService;
-import by.yankavets.typingtrainer.service.UserService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.ExpiredJwtException;
+import by.yankavets.typingtrainer.constant.SecurityConstant;
+import by.yankavets.typingtrainer.security.impl.JwtServiceImpl;
 import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
@@ -32,17 +22,21 @@ import java.io.IOException;
 @Component
 public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 
-    private final JwtService jwtService;
-    private final UserService userService;
+    private static final String AUTHENTICATION_PATTERN = "^/auth.*";
+
+    private final JwtServiceImpl jwtServiceImpl;
+
+    private final UserDetailsService userDetailsService;
 
     @Autowired
     @Qualifier("handlerExceptionResolver")
     private HandlerExceptionResolver resolver;
 
     @Autowired
-    public JwtTokenValidatorFilter(JwtService jwtService, UserService userService) {
-        this.jwtService = jwtService;
-        this.userService = userService;
+    public JwtTokenValidatorFilter(JwtServiceImpl jwtServiceImpl,
+                                   UserDetailsService userDetailsService) {
+        this.jwtServiceImpl = jwtServiceImpl;
+        this.userDetailsService = userDetailsService;
     }
 
     @Override
@@ -55,15 +49,16 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 
             try {
 
-                String userEmail = jwtService.extractUsername(jwt);
-                User userFromDB = userService.findByEmail(userEmail);
+                String userEmail = jwtServiceImpl.extractUsername(jwt);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
-                if (jwtService.isValidToken(jwt, userFromDB)) {
+
+                if (jwtServiceImpl.isValidToken(jwt, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(
-                                    userFromDB.getEmail(),
+                                    userDetails,
                                     null,
-                                    userFromDB.getAuthorities()
+                                    userDetails.getAuthorities()
                             );
 
                     if (SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -83,8 +78,7 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return request.getServletPath().equals("/auth/login")
-                || request.getServletPath().equals("/auth/register");
+        return request.getServletPath().matches(AUTHENTICATION_PATTERN);
     }
 
 

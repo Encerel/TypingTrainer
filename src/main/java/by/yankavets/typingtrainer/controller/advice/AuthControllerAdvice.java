@@ -1,13 +1,10 @@
 package by.yankavets.typingtrainer.controller.advice;
 
-import by.yankavets.typingtrainer.exception.auth.IncorrectCredentialsException;
-import by.yankavets.typingtrainer.exception.auth.UserIsAlreadyExistException;
+import by.yankavets.typingtrainer.exception.auth.*;
 import by.yankavets.typingtrainer.model.entity.payload.ServerResponse;
 import by.yankavets.typingtrainer.model.entity.payload.response.AdviceErrorMessage;
 import by.yankavets.typingtrainer.model.entity.payload.response.AuthenticationResponse;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.security.SignatureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -15,7 +12,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.client.HttpServerErrorException;
 
 @RestControllerAdvice
 public class AuthControllerAdvice {
@@ -89,6 +85,51 @@ public class AuthControllerAdvice {
     }
 
 
+    @ExceptionHandler(InvalidEmailTokenException.class)
+    public ResponseEntity<ServerResponse> handleInvalidEmailToken(
+            InvalidEmailTokenException exception
+    ) {
+        ServerResponse serverResponse = AuthenticationResponse.builder()
+                .message(exception.getMessage())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .build();
+
+        return new ResponseEntity<>(serverResponse, HttpStatus.BAD_REQUEST);
+    }
 
 
+    @ExceptionHandler(AccountIsAlreadyActivatedException.class)
+    public ResponseEntity<ServerResponse> handleAccountWasActivated(
+            AccountIsAlreadyActivatedException exception
+    ) {
+        ServerResponse serverResponse = AuthenticationResponse.builder()
+                .message(exception.getMessage())
+                .status(HttpStatus.CONFLICT.value())
+                .build();
+
+        return new ResponseEntity<>(serverResponse, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(EmailTokenIsExpiredException.class)
+    public ResponseEntity<ServerResponse> handleAccountWasActivated(
+            EmailTokenIsExpiredException exception
+    ) {
+        ServerResponse serverResponse = AuthenticationResponse.builder()
+                .message(exception.getMessage())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .build();
+
+        return new ResponseEntity<>(serverResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(EmailNotSentException.class)
+    public ResponseEntity<ServerResponse> handleEmailNotSentException(
+            EmailNotSentException exception
+    ) {
+        ServerResponse serverResponse = AuthenticationResponse.builder()
+                .message(exception.getMessage())
+                .build();
+
+        return new ResponseEntity<>(serverResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }
