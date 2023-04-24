@@ -1,7 +1,11 @@
 package by.yankavets.typingtrainer.security.filter;
 
+import by.yankavets.typingtrainer.constant.ExceptionMessage;
 import by.yankavets.typingtrainer.constant.SecurityConstant;
+import by.yankavets.typingtrainer.model.entity.payload.ServerResponse;
+import by.yankavets.typingtrainer.model.entity.payload.response.AdviceErrorMessage;
 import by.yankavets.typingtrainer.security.impl.JwtServiceImpl;
+import by.yankavets.typingtrainer.util.JsonErrorWriter;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -9,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,10 +32,6 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
     private final JwtServiceImpl jwtServiceImpl;
 
     private final UserDetailsService userDetailsService;
-
-    @Autowired
-    @Qualifier("handlerExceptionResolver")
-    private HandlerExceptionResolver resolver;
 
     @Autowired
     public JwtTokenValidatorFilter(JwtServiceImpl jwtServiceImpl,
@@ -70,7 +71,18 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 
 
             } catch (JwtException e) {
-                resolver.resolveException(request, response, null, e);
+
+                ServerResponse serverResponse = AdviceErrorMessage.builder()
+                        .message(ExceptionMessage.INCORRECT_JWT_TOKEN)
+                        .status(HttpStatus.UNAUTHORIZED.value())
+                        .build();
+
+                String json = JsonErrorWriter.JSON_WRITER.writeValueAsString(serverResponse);
+
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json; charset=UTF-8");
+                response.getWriter().write(json);
+
             }
         }
 

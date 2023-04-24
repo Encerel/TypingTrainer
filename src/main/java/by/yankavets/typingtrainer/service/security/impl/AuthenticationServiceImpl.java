@@ -1,9 +1,10 @@
 package by.yankavets.typingtrainer.service.security.impl;
 
 import by.yankavets.typingtrainer.constant.ExceptionMessage;
-import by.yankavets.typingtrainer.constant.SuccessfulMessage;
+import by.yankavets.typingtrainer.constant.Message;
 import by.yankavets.typingtrainer.exception.auth.*;
 import by.yankavets.typingtrainer.model.dto.RegisterUserDTO;
+import by.yankavets.typingtrainer.model.dto.ResetPasswordDTO;
 import by.yankavets.typingtrainer.model.dto.UserDTO;
 import by.yankavets.typingtrainer.model.entity.user.RoleName;
 import by.yankavets.typingtrainer.model.entity.user.User;
@@ -14,9 +15,11 @@ import by.yankavets.typingtrainer.model.entity.payload.response.MessageServerRes
 import by.yankavets.typingtrainer.repository.RoleRepository;
 import by.yankavets.typingtrainer.security.impl.JwtServiceImpl;
 import by.yankavets.typingtrainer.service.email.EmailService;
+import by.yankavets.typingtrainer.service.email.impl.EmailConfirmationService;
+import by.yankavets.typingtrainer.service.email.impl.PasswordResetService;
+import by.yankavets.typingtrainer.service.email.token.PasswordResetToken;
 import by.yankavets.typingtrainer.service.user.UserService;
 import by.yankavets.typingtrainer.service.security.AuthenticationService;
-import by.yankavets.typingtrainer.service.email.EmailConfirmationTokenService;
 import by.yankavets.typingtrainer.service.email.token.EmailConfirmationToken;
 import by.yankavets.typingtrainer.util.DTOErrorPrinter;
 import jakarta.validation.Valid;
@@ -24,6 +27,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -46,8 +51,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
-    private final EmailConfirmationTokenService emailConfirmationTokenService;
-    private final EmailService emailService;
+
+
+    private final JavaMailSender mailSender;
 
     private static final String EMAIL_LINK = "http://26.189.24.33:8080/auth/register/confirm?token=";
 
@@ -57,15 +63,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                                      JwtServiceImpl jwtServiceImpl,
                                      UserService userService, PasswordEncoder passwordEncoder,
                                      RoleRepository roleRepository,
-                                     EmailConfirmationTokenService emailConfirmationTokenService,
-                                     EmailService emailService) {
+                                     JavaMailSender mailSender) {
         this.userService = userService;
         this.modelMapper = modelMapper;
         this.jwtServiceImpl = jwtServiceImpl;
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
-        this.emailConfirmationTokenService = emailConfirmationTokenService;
-        this.emailService = emailService;
+        this.mailSender = mailSender;
     }
 
     @Override
@@ -101,22 +105,21 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .user(registeredUser)
                 .build();
 
-       emailConfirmationTokenService.saveConfirmationToken(emailConfirmationToken);
-
+        userService.saveConfirmationToken(emailConfirmationToken);
+        EmailService emailService = new EmailConfirmationService(mailSender);
         emailService.send(
                 registeredUser.getEmail(),
-                emailService.buildLetter(registeredUser.getName(), EMAIL_LINK + emailConfirmationToken.getToken())
+                emailService.composeLetter(registeredUser.getName(), EMAIL_LINK + emailConfirmationToken.getToken())
         );
 
         ServerResponse response = RegistrationResponse.builder()
-                .message(SuccessfulMessage.USER_CREATED_SUCCESSFULLY)
+                .message(Message.USER_CREATED_SUCCESSFULLY)
                 .status(HttpStatus.CREATED.value())
                 .confirmationToken(token)
                 .build();
 
         return ResponseEntity.ok(response);
     }
-
 
 
     @Override
@@ -155,10 +158,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Transactional
     public ResponseEntity<ServerResponse> confirmEmailToken(String token) {
 
-        Optional<EmailConfirmationToken> confirmationTokenOptional = emailConfirmationTokenService.findToken(token);
+        Optional<EmailConfirmationToken> confirmationTokenOptional = userService.findEmailToken(token);
 
         if (confirmationTokenOptional.isEmpty()) {
-            throw new InvalidEmailTokenException(ExceptionMessage.TOKEN_NOT_FOUND);
+            throw new InvalidTokenException(ExceptionMessage.WRONG_TOKEN);
         }
 
         EmailConfirmationToken confirmationToken = confirmationTokenOptional.get();
@@ -170,17 +173,91 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         LocalDateTime expiredAt = confirmationToken.getExpiresAt();
 
         if (expiredAt.isBefore(LocalDateTime.now())) {
-            throw new EmailTokenIsExpiredException(ExceptionMessage.CONFIRMATION_TOKEN_EXPIRED);
+            throw new TokenIsExpiredException(ExceptionMessage.CONFIRMATION_TOKEN_EXPIRED);
         }
 
-        emailConfirmationTokenService.setConfirmedAt(token);
+        userService.setConfirmedAt(token);
         userService.enableUser(
                 confirmationToken.getUser().getEmail()
         );
 
         ServerResponse response = MessageServerResponse.builder()
                 .status(HttpStatus.OK.value())
-                .message(SuccessfulMessage.ACCOUNT_CONFIRMED)
+                .message(Message.ACCOUNT_CONFIRMED)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<ServerResponse> sendPasswordResetCode(String email) {
+
+        Optional<User> optionalUser = userService.findByEmail(email);
+
+        if (optionalUser.isEmpty()) {
+            throw new UsernameNotFoundException("User with such email does not exist!");
+        }
+        User user = optionalUser.get();
+
+        EmailService emailService = new PasswordResetService(mailSender);
+
+        String token = UUID.randomUUID().toString();
+
+        emailService.send(email, emailService.composeLetter(
+                user.getName(),
+                token
+        ));
+
+
+        PasswordResetToken resetToken = PasswordResetToken.builder()
+                .token(token)
+                .createdAt(LocalDateTime.now())
+                .expiresAt(LocalDateTime.now().plusMinutes(15))
+                .user(user)
+                .build();
+
+        userService.savePasswordResetToken(resetToken);
+
+        ServerResponse response = MessageServerResponse.builder()
+                .status(HttpStatus.OK.value())
+                .message(Message.RESET_PASSWORD_MESSAGE)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<ServerResponse> resetPassword(ResetPasswordDTO resetPasswordDTO) {
+
+        if (!resetPasswordDTO.getPassword().equals(resetPasswordDTO.getConfirmedPassword())) {
+            throw new BadCredentialsException(ExceptionMessage.PASSWORDS_MISMATCH);
+        }
+
+        Optional<PasswordResetToken> optionalPasswordResetToken = userService.findPasswordResetToken(resetPasswordDTO.getToken());
+
+        if (optionalPasswordResetToken.isEmpty()) {
+            throw new InvalidTokenException(ExceptionMessage.WRONG_TOKEN);
+        }
+        PasswordResetToken passwordResetToken = optionalPasswordResetToken.get();
+
+
+        LocalDateTime expiredAt = passwordResetToken.getExpiresAt();
+
+        if (expiredAt.isBefore(LocalDateTime.now())) {
+            throw new TokenIsExpiredException(ExceptionMessage.PASSWORD_RESET_TOKEN_EXPIRED);
+        }
+
+        userService.setResetAt(resetPasswordDTO.getToken());
+
+        User user = passwordResetToken.getUser();
+        user.setPassword(passwordEncoder.encode(resetPasswordDTO.getPassword()));
+        userService.save(user);
+
+        ServerResponse response = MessageServerResponse.builder()
+                .status(HttpStatus.OK.value())
+                .message(Message.PASSWORD_WAS_CHANGED)
                 .build();
 
         return ResponseEntity.ok(response);

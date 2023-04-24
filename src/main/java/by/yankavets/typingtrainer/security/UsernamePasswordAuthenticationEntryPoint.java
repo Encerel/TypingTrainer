@@ -36,7 +36,7 @@ public class UsernamePasswordAuthenticationEntryPoint implements AuthenticationE
         final Map<String, Object> body = new HashMap<>();
         body.put(ERROR_FIELD, UNAUTHORIZED);
         body.put(PATH_FIELD, request.getServletPath());
-        body.put(MESSAGE_FIELD, MESSAGE);
+        body.put(MESSAGE_FIELD, authException.getMessage());
         body.put(STATUS_FIELD, HttpServletResponse.SC_UNAUTHORIZED);
         final ObjectMapper mapper = new ObjectMapper();
         mapper.writeValue(response.getOutputStream(), body);

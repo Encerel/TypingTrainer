@@ -1,29 +1,25 @@
 package by.yankavets.typingtrainer.service.email.impl;
 
+import by.yankavets.typingtrainer.constant.Message;
 import by.yankavets.typingtrainer.exception.auth.EmailNotSentException;
 import by.yankavets.typingtrainer.service.email.EmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import static by.yankavets.typingtrainer.constant.EmailConstant.EMAIL_ENCODING;
+import static by.yankavets.typingtrainer.constant.EmailConstant.EMAIL_FROM;
+import static by.yankavets.typingtrainer.constant.ExceptionMessage.EMAIL_EXCEPTION_MESSAGE;
+
 @Service
-public class EmailServiceImpl implements EmailService {
-
-    private static final String CONFIRM_EMAIL_SUBJECT = "Confirm your email";
-    private static final String EMAIL_FROM = "typingtrainerofficial@gmail.com";
-    private static final String EMAIL_EXCEPTION_MESSAGE = "Failed to send email!";
-    private static final String EMAIL_ENCODING = "utf-8";
-
-
+public class PasswordResetService implements EmailService {
 
     private final JavaMailSender mailSender;
 
-    @Autowired
-    public EmailServiceImpl(JavaMailSender mailSender) {
+    public PasswordResetService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
 
@@ -36,7 +32,7 @@ public class EmailServiceImpl implements EmailService {
                     new MimeMessageHelper(mimeMessage, EMAIL_ENCODING);
             helper.setText(message, true);
             helper.setTo(to);
-            helper.setSubject(CONFIRM_EMAIL_SUBJECT);
+            helper.setSubject(Message.PASSWORD_RESET_SUBJECT);
             helper.setFrom(EMAIL_FROM);
             mailSender.send(mimeMessage);
         } catch (MessagingException e) {
@@ -45,7 +41,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public String buildLetter(String username, String link) {
+    public String composeLetter(String username, String token) {
         return "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">\n" +
                 "\n" +
                 "<span style=\"display:none;font-size:1px;color:#fff;max-height:0\"></span>\n" +
@@ -63,7 +59,7 @@ public class EmailServiceImpl implements EmailService {
                 "                  \n" +
                 "                    </td>\n" +
                 "                    <td style=\"font-size:28px;line-height:1.315789474;Margin-top:4px;padding-left:10px\">\n" +
-                "                      <span style=\"font-family:Helvetica,Arial,sans-serif;font-weight:700;color:#ffffff;text-decoration:none;vertical-align:top;display:inline-block\">Confirm your email</span>\n" +
+                "                      <span style=\"font-family:Helvetica,Arial,sans-serif;font-weight:700;color:#ffffff;text-decoration:none;vertical-align:top;display:inline-block\">Password reset</span>\n" +
                 "                    </td>\n" +
                 "                  </tr>\n" +
                 "                </tbody></table>\n" +
@@ -101,7 +97,7 @@ public class EmailServiceImpl implements EmailService {
                 "      <td width=\"10\" valign=\"middle\"><br></td>\n" +
                 "      <td style=\"font-family:Helvetica,Arial,sans-serif;font-size:19px;line-height:1.315789474;max-width:560px\">\n" +
                 "        \n" +
-                "            <p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">Hi " + username + ",</p><p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"> Thank you for registering. Please click on the below link to activate your account: </p><blockquote style=\"Margin:0 0 20px 0;border-left:10px solid #b1b4b6;padding:15px 0 0.1px 15px;font-size:19px;line-height:25px\"><p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"> <a href=\"" + link + "\">Activate Now</a> </p></blockquote>\n Link will expire in 24 hours. <p>See you soon</p>" +
+                "            <p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">Hi " + username + ",</p><p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"> Someone wants to reset password. If it is not you don't do anything.   </p><blockquote style=\"Margin:0 0 20px 0;border-left:10px solid #b1b4b6;padding:15px 0 0.1px 15px;font-size:19px;line-height:25px\"><p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"> Reset code:" + token + "</p></blockquote>\n <p>See you soon</p>" +
                 "        \n" +
                 "      </td>\n" +
                 "      <td width=\"10\" valign=\"middle\"><br></td>\n" +

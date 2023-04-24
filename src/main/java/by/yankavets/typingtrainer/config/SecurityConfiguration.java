@@ -23,8 +23,6 @@ import java.util.List;
 @Configuration
 public class SecurityConfiguration {
 
-
-
     private final JwtTokenValidatorFilter jwtTokenValidatorFilter;
     private final AuthenticationEntryPoint authenticationEntryPoint;
 

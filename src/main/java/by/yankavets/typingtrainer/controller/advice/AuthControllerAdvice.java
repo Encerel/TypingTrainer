@@ -85,9 +85,9 @@ public class AuthControllerAdvice {
     }
 
 
-    @ExceptionHandler(InvalidEmailTokenException.class)
+    @ExceptionHandler(InvalidTokenException.class)
     public ResponseEntity<ServerResponse> handleInvalidEmailToken(
-            InvalidEmailTokenException exception
+            InvalidTokenException exception
     ) {
         ServerResponse serverResponse = AuthenticationResponse.builder()
                 .message(exception.getMessage())
@@ -110,9 +110,9 @@ public class AuthControllerAdvice {
         return new ResponseEntity<>(serverResponse, HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(EmailTokenIsExpiredException.class)
+    @ExceptionHandler(TokenIsExpiredException.class)
     public ResponseEntity<ServerResponse> handleAccountWasActivated(
-            EmailTokenIsExpiredException exception
+            TokenIsExpiredException exception
     ) {
         ServerResponse serverResponse = AuthenticationResponse.builder()
                 .message(exception.getMessage())

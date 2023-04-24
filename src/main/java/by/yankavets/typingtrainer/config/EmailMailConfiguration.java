@@ -8,6 +8,8 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 import java.util.Properties;
 
+import static by.yankavets.typingtrainer.constant.EmailConstant.EMAIL_ENCODING;
+
 @Configuration
 public class EmailMailConfiguration {
 
@@ -26,8 +28,8 @@ public class EmailMailConfiguration {
     @Value("${spring.mail.protocol}")
     private String protocol;
 
-//    @Value("${mail.debug}")
-    private String debug = "true";
+
+
 
     @Bean
     public JavaMailSender getMailSender() {
@@ -37,13 +39,14 @@ public class EmailMailConfiguration {
         mailSender.setPort(port);
         mailSender.setUsername(username);
         mailSender.setPassword(password);
+        mailSender.setDefaultEncoding(EMAIL_ENCODING);
 
 
         Properties properties = mailSender.getJavaMailProperties();
 
         properties.setProperty("mail.smtp.starttls.enable","true");
         properties.setProperty("mail.transport.protocol", protocol);
-        properties.setProperty("mail.debug", debug);
+        properties.setProperty("mail.debug", "true");
 
         return mailSender;
     }

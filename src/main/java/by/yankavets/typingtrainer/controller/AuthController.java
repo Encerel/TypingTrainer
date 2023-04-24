@@ -1,6 +1,7 @@
 package by.yankavets.typingtrainer.controller;
 
 import by.yankavets.typingtrainer.model.dto.RegisterUserDTO;
+import by.yankavets.typingtrainer.model.dto.ResetPasswordDTO;
 import by.yankavets.typingtrainer.model.entity.payload.ServerResponse;
 import by.yankavets.typingtrainer.service.security.AuthenticationService;
 import jakarta.validation.Valid;
@@ -37,11 +38,24 @@ public class AuthController {
     }
 
     @GetMapping("/register/confirm")
-    private ResponseEntity<ServerResponse> confirmEmailToken(
+    public ResponseEntity<ServerResponse> confirmEmailToken(
             @RequestParam(value = "token")
             String token
     ) {
         return authenticationService.confirmEmailToken(token);
+    }
+
+
+    @GetMapping("/password-reset")
+    public ResponseEntity<ServerResponse> sendResetCode(@RequestParam("email") String email) {
+        return authenticationService.sendPasswordResetCode(email);
+    }
+
+    @PostMapping("/password-reset")
+    public ResponseEntity<ServerResponse> resetPassword(
+            @RequestBody
+            ResetPasswordDTO resetPasswordDTO) {
+        return authenticationService.resetPassword(resetPasswordDTO);
     }
 
 
