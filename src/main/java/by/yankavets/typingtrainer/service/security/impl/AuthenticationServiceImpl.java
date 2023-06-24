@@ -3,6 +3,7 @@ package by.yankavets.typingtrainer.service.security.impl;
 import by.yankavets.typingtrainer.constant.ExceptionMessage;
 import by.yankavets.typingtrainer.constant.Message;
 import by.yankavets.typingtrainer.exception.auth.*;
+import by.yankavets.typingtrainer.exception.user.UserNotFoundException;
 import by.yankavets.typingtrainer.mapper.UserMapper;
 import by.yankavets.typingtrainer.model.dto.SignUpDto;
 import by.yankavets.typingtrainer.model.dto.ResetPasswordDto;
@@ -67,7 +68,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public AuthenticationServiceImpl(JwtServiceImpl jwtServiceImpl,
                                      UserService userService, PasswordEncoder passwordEncoder,
                                      RoleRepository roleRepository,
-                                     JavaMailSender mailSender, CourseService courseService, UserMapper userMapper, LessonService lessonService, ExerciseService exerciseService) {
+                                     JavaMailSender mailSender, CourseService courseService,
+                                     UserMapper userMapper, LessonService lessonService, ExerciseService exerciseService) {
         this.userService = userService;
         this.jwtServiceImpl = jwtServiceImpl;
         this.passwordEncoder = passwordEncoder;
@@ -84,9 +86,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public ResponseEntity<ServerResponse> register(SignUpDto signUpDTO) {
 
 
-        User userFromDb = userService.findByEmail(signUpDTO.getEmail());
+        Optional<User> userFromDb = userService.findByEmail(signUpDTO.getEmail());
 
-        if (userFromDb != null) {
+        if (userFromDb.isPresent()) {
             throw new UserIsAlreadyExistException(signUpDTO.getEmail());
         }
 
@@ -128,13 +130,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             return ResponseEntity.ok(serverResponse);
         }
 
-        User userFromDB = userService.findByEmail(authentication.getName());
+        Optional<User> userFromDB = userService.findByEmail(authentication.getName());
+
+        if (userFromDB.isEmpty()) {
+            throw new UserNotFoundException(ExceptionMessage.NO_USER_WITH_SUCH_EMAIL);
+        }
 
         serverResponse = AuthenticationResponse
                 .builder()
-                .userDTO(userMapper.toDto(userFromDB))
+                .userDTO(userMapper.toDto(userFromDB.get()))
                 .status(HttpStatus.OK.value())
-                .jwtToken(jwtServiceImpl.generateToken(userFromDB))
+                .jwtToken(jwtServiceImpl.generateToken(userFromDB.get()))
                 .build();
 
 
@@ -186,14 +192,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new IncorrectCredentialsException(ExceptionMessage.WRONG_EMAIL);
         }
 
-        User userFromDB = userService.findByEmail(email);
+        Optional<User> userFromDB = userService.findByEmail(email);
+
+        if (userFromDB.isEmpty()) {
+            throw new UserNotFoundException(ExceptionMessage.NO_USER_WITH_SUCH_EMAIL);
+        }
 
         EmailService emailService = new PasswordResetService(mailSender);
 
         String token = UUID.randomUUID().toString();
 
         emailService.send(email, emailService.composeLetter(
-                userFromDB.getName(),
+                userFromDB.get().getName(),
                 token
         ));
 
@@ -201,7 +211,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .token(token)
                 .createdAt(LocalDateTime.now())
                 .expiresAt(LocalDateTime.now().plusMinutes(15))
-                .user(userFromDB)
+                .user(userFromDB.get())
                 .build();
 
         userService.savePasswordResetToken(resetToken);

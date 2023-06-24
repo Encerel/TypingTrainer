@@ -1,5 +1,6 @@
 package by.yankavets.typingtrainer.service.user.impl;
 
+import by.yankavets.typingtrainer.mapper.UserMapper;
 import by.yankavets.typingtrainer.model.entity.user.Role;
 import by.yankavets.typingtrainer.model.entity.user.User;
 import by.yankavets.typingtrainer.repository.EmailConfirmationTokenRepository;
@@ -71,6 +72,9 @@ public class UserServiceImplTest {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private UserMapper userMapper;
+
     @Test
     @DisplayName("Add user in database test")
     void addUserInDatabaseTest() {
@@ -85,7 +89,7 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("Find all user test")
     void findAllUsers() {
-        when(userService.findAll()).thenReturn(TEST_USER_LIST);
+        when(userService.findAll()).thenReturn(userMapper.toDtoList(TEST_USER_LIST));
         var actualAll = userRepository.findAll();
         assertIterableEquals(TEST_USER_LIST, actualAll);
         assertFalse(actualAll.isEmpty(), "Should be at least one user");
@@ -96,7 +100,8 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("Find user by email")
     void findUserByEmail() {
-        when(userService.findByEmail(TEST_USER_EMAIL)).thenReturn(TEST_USER);
+        var foundUser = Optional.of(TEST_USER);
+        when(userService.findByEmail(TEST_USER_EMAIL)).thenReturn(foundUser);
         var actualByEmail = userService.findByEmail(TEST_USER_EMAIL);
         assertThat(TEST_USER).isEqualTo(actualByEmail);
         verify(userRepository).findByEmail(TEST_USER_EMAIL);

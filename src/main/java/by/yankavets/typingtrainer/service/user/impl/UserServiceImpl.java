@@ -31,7 +31,10 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, EmailConfirmationTokenRepository emailConfirmationTokenRepository, PasswordResetTokenRepository passwordResetTokenRepository, UserMapper userMapper) {
+    public UserServiceImpl(UserRepository userRepository,
+                           EmailConfirmationTokenRepository emailConfirmationTokenRepository,
+                           PasswordResetTokenRepository passwordResetTokenRepository,
+                           UserMapper userMapper) {
         this.userRepository = userRepository;
         this.emailConfirmationTokenRepository = emailConfirmationTokenRepository;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
@@ -53,12 +56,8 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public User findByEmail(String email) {
-
-        return userRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new UserNotFoundException(ExceptionMessage.NO_USER_WITH_SUCH_EMAIL)
-                );
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
     @Override

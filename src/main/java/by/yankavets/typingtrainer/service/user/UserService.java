@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface UserService {
 
     List<UserDto> findAll();
-    User findByEmail(String email);
+    Optional<User> findByEmail(String email);
 
     User save(User registeredUser);
 

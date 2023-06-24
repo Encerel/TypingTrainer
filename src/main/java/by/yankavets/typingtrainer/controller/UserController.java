@@ -1,5 +1,7 @@
 package by.yankavets.typingtrainer.controller;
 
+import by.yankavets.typingtrainer.constant.ExceptionMessage;
+import by.yankavets.typingtrainer.exception.user.UserNotFoundException;
 import by.yankavets.typingtrainer.mapper.UserMapper;
 import by.yankavets.typingtrainer.model.dto.UserDto;
 import by.yankavets.typingtrainer.model.entity.payload.ServerResponse;
@@ -41,7 +43,12 @@ public class UserController {
     public UserDto findByEmail(
             @RequestParam("email") String email
     ) {
-        return userMapper.toDto(userService.findByEmail(email));
+        return userMapper.toDto(
+                userService.findByEmail(email)
+                        .orElseThrow(
+                                () -> new UserNotFoundException(ExceptionMessage.NO_USER_WITH_SUCH_EMAIL)
+                        )
+        );
     }
 
 }
