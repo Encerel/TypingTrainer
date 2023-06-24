@@ -1,5 +1,6 @@
 package by.yankavets.typingtrainer.repository;
 
+import by.yankavets.typingtrainer.model.entity.training.Course;
 import by.yankavets.typingtrainer.model.entity.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

@@ -1,6 +1,6 @@
 package by.yankavets.typingtrainer.repository;
 
-import by.yankavets.typingtrainer.service.email.token.PasswordResetToken;
+import by.yankavets.typingtrainer.model.entity.token.PasswordResetToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

@@ -3,27 +3,30 @@ package by.yankavets.typingtrainer.service.security.impl;
 import by.yankavets.typingtrainer.constant.ExceptionMessage;
 import by.yankavets.typingtrainer.constant.Message;
 import by.yankavets.typingtrainer.exception.auth.*;
-import by.yankavets.typingtrainer.model.dto.RegisterUserDTO;
-import by.yankavets.typingtrainer.model.dto.ResetPasswordDTO;
-import by.yankavets.typingtrainer.model.dto.UserDTO;
+import by.yankavets.typingtrainer.mapper.UserMapper;
+import by.yankavets.typingtrainer.model.dto.SignUpDto;
+import by.yankavets.typingtrainer.model.dto.ResetPasswordDto;
+import by.yankavets.typingtrainer.model.entity.training.Course;
+import by.yankavets.typingtrainer.model.entity.training.Exercise;
+import by.yankavets.typingtrainer.model.entity.training.Lesson;
 import by.yankavets.typingtrainer.model.entity.user.RoleName;
 import by.yankavets.typingtrainer.model.entity.user.User;
 import by.yankavets.typingtrainer.model.entity.payload.ServerResponse;
 import by.yankavets.typingtrainer.model.entity.payload.response.AuthenticationResponse;
-import by.yankavets.typingtrainer.model.entity.payload.response.RegistrationResponse;
 import by.yankavets.typingtrainer.model.entity.payload.response.MessageServerResponse;
 import by.yankavets.typingtrainer.repository.RoleRepository;
 import by.yankavets.typingtrainer.security.impl.JwtServiceImpl;
 import by.yankavets.typingtrainer.service.email.EmailService;
 import by.yankavets.typingtrainer.service.email.impl.EmailConfirmationService;
 import by.yankavets.typingtrainer.service.email.impl.PasswordResetService;
-import by.yankavets.typingtrainer.service.email.token.PasswordResetToken;
+import by.yankavets.typingtrainer.model.entity.token.PasswordResetToken;
+import by.yankavets.typingtrainer.service.training.CourseService;
+import by.yankavets.typingtrainer.service.training.ExerciseService;
+import by.yankavets.typingtrainer.service.training.LessonService;
 import by.yankavets.typingtrainer.service.user.UserService;
 import by.yankavets.typingtrainer.service.security.AuthenticationService;
-import by.yankavets.typingtrainer.service.email.token.EmailConfirmationToken;
-import by.yankavets.typingtrainer.util.DTOErrorPrinter;
-import jakarta.validation.Valid;
-import org.modelmapper.ModelMapper;
+import by.yankavets.typingtrainer.model.entity.token.EmailConfirmationToken;
+import by.yankavets.typingtrainer.validator.UserValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,10 +37,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.BindingResult;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -46,64 +49,54 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class AuthenticationServiceImpl implements AuthenticationService {
 
-    private final ModelMapper modelMapper;
     private final JwtServiceImpl jwtServiceImpl;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
-
-
     private final JavaMailSender mailSender;
+    private final CourseService courseService;
 
+    private final UserMapper userMapper;
+    private final LessonService lessonService;
+    private final ExerciseService exerciseService;
     private static final String EMAIL_LINK = "http://26.189.24.33:8080/auth/register/confirm?token=";
+    private static final String EMAIL_REGEX = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
 
 
     @Autowired
-    public AuthenticationServiceImpl(ModelMapper modelMapper,
-                                     JwtServiceImpl jwtServiceImpl,
+    public AuthenticationServiceImpl(JwtServiceImpl jwtServiceImpl,
                                      UserService userService, PasswordEncoder passwordEncoder,
                                      RoleRepository roleRepository,
-                                     JavaMailSender mailSender) {
+                                     JavaMailSender mailSender, CourseService courseService, UserMapper userMapper, LessonService lessonService, ExerciseService exerciseService) {
         this.userService = userService;
-        this.modelMapper = modelMapper;
         this.jwtServiceImpl = jwtServiceImpl;
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
         this.mailSender = mailSender;
+        this.courseService = courseService;
+        this.userMapper = userMapper;
+        this.lessonService = lessonService;
+        this.exerciseService = exerciseService;
     }
 
     @Override
     @Transactional
-    public ResponseEntity<ServerResponse> register(@Valid RegisterUserDTO registerUserDTO,
-                                                   BindingResult bindingResult) {
-        Optional<User> userFromDb = userService.findByEmail(registerUserDTO.getEmail());
+    public ResponseEntity<ServerResponse> register(SignUpDto signUpDTO) {
 
-        if (bindingResult.hasErrors()) {
-            throw new IncorrectCredentialsException(DTOErrorPrinter.printErrors(bindingResult));
-        }
+
+        Optional<User> userFromDb = userService.findByEmail(signUpDTO.getEmail());
 
         if (userFromDb.isPresent()) {
-            throw new UserIsAlreadyExistException(registerUserDTO.getEmail());
+            throw new UserIsAlreadyExistException(signUpDTO.getEmail());
         }
 
-        User registeredUser = new User();
-        String encodedPassword = passwordEncoder.encode(registerUserDTO.getPassword());
-        registeredUser.setName(registerUserDTO.getName());
-        registeredUser.setEmail(registerUserDTO.getEmail());
-        registeredUser.setPassword(encodedPassword);
+        UserValidator.validate(signUpDTO);
 
-        registeredUser.setRoles(Set.of(roleRepository.findByName(RoleName.ROLE_USER.name())));
-        registeredUser.setCreatedAt(LocalDate.now());
-        userService.save(registeredUser);
+        User registeredUser = buildUserEntity(signUpDTO);
+        User savedUser = userService.save(registeredUser);
+        exerciseService.enableFirstExercises(savedUser.getId());
 
-        String token = UUID.randomUUID().toString();
-
-        EmailConfirmationToken emailConfirmationToken = EmailConfirmationToken.builder()
-                .token(token)
-                .createdAt(LocalDateTime.now())
-                .expiresAt(LocalDateTime.now().plusDays(1))
-                .user(registeredUser)
-                .build();
+        EmailConfirmationToken emailConfirmationToken = buildEmailToken(registeredUser);
 
         userService.saveConfirmationToken(emailConfirmationToken);
         EmailService emailService = new EmailConfirmationService(mailSender);
@@ -112,14 +105,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 emailService.composeLetter(registeredUser.getName(), EMAIL_LINK + emailConfirmationToken.getToken())
         );
 
-        ServerResponse response = RegistrationResponse.builder()
-                .message(Message.USER_CREATED_SUCCESSFULLY)
-                .status(HttpStatus.CREATED.value())
-                .confirmationToken(token)
-                .build();
+        ServerResponse response = buildMessageResponse(
+                HttpStatus.CREATED.value(),
+                Message.USER_CREATED_SUCCESSFULLY);
 
         return ResponseEntity.ok(response);
     }
+
+
 
 
     @Override
@@ -138,14 +131,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         Optional<User> userFromDB = userService.findByEmail(authentication.getName());
 
         if (userFromDB.isEmpty()) {
-            throw new UsernameNotFoundException(ExceptionMessage.WRONG_EMAIL);
+            throw new UsernameNotFoundException(ExceptionMessage.NO_USER_WITH_SUCH_EMAIL);
         }
 
         User foundUser = userFromDB.get();
 
         serverResponse = AuthenticationResponse
                 .builder()
-                .userDTO(modelMapper.map(foundUser, UserDTO.class))
+                .userDTO(userMapper.toDto(foundUser))
                 .status(HttpStatus.OK.value())
                 .jwtToken(jwtServiceImpl.generateToken(foundUser))
                 .build();
@@ -156,7 +149,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     @Transactional
-    public ResponseEntity<ServerResponse> confirmEmailToken(String token) {
+    public ResponseEntity<ServerResponse> sendConfirmEmailToken(String token) {
 
         Optional<EmailConfirmationToken> confirmationTokenOptional = userService.findEmailToken(token);
 
@@ -181,10 +174,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 confirmationToken.getUser().getEmail()
         );
 
-        ServerResponse response = MessageServerResponse.builder()
-                .status(HttpStatus.OK.value())
-                .message(Message.ACCOUNT_CONFIRMED)
-                .build();
+
+
+        ServerResponse response = buildMessageResponse(
+                HttpStatus.OK.value(),
+                Message.ACCOUNT_CONFIRMED
+        );
 
         return ResponseEntity.ok(response);
     }
@@ -192,6 +187,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     @Transactional
     public ResponseEntity<ServerResponse> sendPasswordResetCode(String email) {
+
+        if (!email.matches(EMAIL_REGEX)) {
+            throw new IncorrectCredentialsException(ExceptionMessage.WRONG_EMAIL);
+        }
 
         Optional<User> optionalUser = userService.findByEmail(email);
 
@@ -229,7 +228,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     @Transactional
-    public ResponseEntity<ServerResponse> resetPassword(ResetPasswordDTO resetPasswordDTO) {
+    public ResponseEntity<ServerResponse> resetPassword(ResetPasswordDto resetPasswordDTO) {
 
         if (!resetPasswordDTO.getPassword().equals(resetPasswordDTO.getConfirmedPassword())) {
             throw new BadCredentialsException(ExceptionMessage.PASSWORDS_MISMATCH);
@@ -242,6 +241,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
         PasswordResetToken passwordResetToken = optionalPasswordResetToken.get();
 
+        if (passwordResetToken.getResetAt() != null) {
+            throw new TokenIsExpiredException(ExceptionMessage.PASSWORD_RESET_TOKEN_WAS_USED);
+        }
 
         LocalDateTime expiredAt = passwordResetToken.getExpiresAt();
 
@@ -257,9 +259,48 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         ServerResponse response = MessageServerResponse.builder()
                 .status(HttpStatus.OK.value())
-                .message(Message.PASSWORD_WAS_CHANGED)
+                .message(Message.PASSWORD_HAS_CHANGED)
                 .build();
 
         return ResponseEntity.ok(response);
     }
+
+    private User buildUserEntity(SignUpDto signUpDTO) {
+        List<Course> courses = courseService.findAll();
+        List<Lesson> lessons = lessonService.findAll();
+        List<Exercise> exercises = exerciseService.findAll();
+        User registeredUser = new User();
+        String encodedPassword = passwordEncoder.encode(signUpDTO.getPassword());
+        registeredUser.setName(signUpDTO.getName());
+        registeredUser.setEmail(signUpDTO.getEmail());
+        registeredUser.setPassword(encodedPassword);
+        registeredUser.setRoles(Set.of(roleRepository.findByName(RoleName.ROLE_USER.name())));
+        registeredUser.setCreatedAt(LocalDate.now());
+        registeredUser.setCourses(courses);
+        registeredUser.setLessons(lessons);
+        registeredUser.setExercises(exercises);
+        return registeredUser;
+
+    }
+
+    private EmailConfirmationToken buildEmailToken(User registeredUser) {
+        String token = UUID.randomUUID().toString();
+        return EmailConfirmationToken.builder()
+                .token(token)
+                .createdAt(LocalDateTime.now())
+                .expiresAt(LocalDateTime.now().plusDays(1))
+                .user(registeredUser)
+                .build();
+    }
+
+    private MessageServerResponse buildMessageResponse(int status, String message) {
+        return MessageServerResponse.builder()
+                .message(message)
+                .status(status)
+                .build();
+    }
+
+
+
+
 }

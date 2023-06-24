@@ -1,15 +1,20 @@
 package by.yankavets.typingtrainer.model.entity.user;
 
+import by.yankavets.typingtrainer.model.entity.training.Course;
+import by.yankavets.typingtrainer.model.entity.training.Exercise;
+import by.yankavets.typingtrainer.model.entity.training.Lesson;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
+import org.hibernate.annotations.Fetch;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -20,6 +25,7 @@ import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(of = {"id", "email"})
 public class User implements UserDetails {
 
     @Id
@@ -28,7 +34,7 @@ public class User implements UserDetails {
     private long id;
 
     @Column(name = "name")
-    // todo past NotEmpty annotation
+    @NotEmpty
     private String name;
 
     @Column(name = "email")
@@ -56,6 +62,30 @@ public class User implements UserDetails {
 
     @Column(name = "enabled")
     private boolean enabled;
+
+    @ManyToMany
+    @JoinTable(
+            name = "users_course",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "course_id")
+    )
+    private List<Course> courses;
+
+    @ManyToMany
+    @JoinTable(
+            name = "users_lesson",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "lesson_id")
+    )
+    private List<Lesson> lessons;
+
+    @ManyToMany
+    @JoinTable(
+            name = "users_exercise",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "exercise_id")
+    )
+    private List<Exercise> exercises;
 
 
     @Override
@@ -98,3 +128,5 @@ public class User implements UserDetails {
         return enabled;
     }
 }
+
+

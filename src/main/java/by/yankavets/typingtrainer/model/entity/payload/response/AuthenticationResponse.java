@@ -1,6 +1,6 @@
 package by.yankavets.typingtrainer.model.entity.payload.response;
 
-import by.yankavets.typingtrainer.model.dto.UserDTO;
+import by.yankavets.typingtrainer.model.dto.UserDto;
 import by.yankavets.typingtrainer.model.entity.payload.ServerResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
@@ -14,7 +14,7 @@ import lombok.*;
 public class AuthenticationResponse implements ServerResponse {
 
 
-    private UserDTO userDTO;
+    private UserDto userDTO;
     private String message;
     private int status;
     private String jwtToken;

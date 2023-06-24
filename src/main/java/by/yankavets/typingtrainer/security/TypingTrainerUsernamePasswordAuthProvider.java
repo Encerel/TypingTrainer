@@ -28,14 +28,14 @@ public class TypingTrainerUsernamePasswordAuthProvider implements Authentication
         this.passwordEncoder = passwordEncoder;
     }
 
-//    @Override
+    @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String username = authentication.getName().strip();
         String password = authentication.getCredentials().toString().strip();
         Optional<User> userFromDB = userRepository.findByEmail(username);
 
         if (userFromDB.isEmpty()) {
-            throw new BadCredentialsException(ExceptionMessage.WRONG_EMAIL);
+            throw new BadCredentialsException(ExceptionMessage.NO_USER_WITH_SUCH_EMAIL);
         }
 
         User user = userFromDB.get();
@@ -43,11 +43,12 @@ public class TypingTrainerUsernamePasswordAuthProvider implements Authentication
         if (passwordEncoder.matches(password, user.getPassword())) {
             return new UsernamePasswordAuthenticationToken(username, password, user.getAuthorities());
         } else {
-            throw new BadCredentialsException(ExceptionMessage.WRONG_PASSWORD);
+            throw new BadCredentialsException(ExceptionMessage.WRONG_PASSWORD_SIGN_IN);
         }
     }
 
-//    @Override
+
+    @Override
     public boolean supports(Class<?> authentication) {
         return (UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication));
     }

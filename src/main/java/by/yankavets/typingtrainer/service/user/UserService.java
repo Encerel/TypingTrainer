@@ -1,18 +1,22 @@
 package by.yankavets.typingtrainer.service.user;
 
+import by.yankavets.typingtrainer.model.dto.UserDto;
 import by.yankavets.typingtrainer.model.entity.user.User;
-import by.yankavets.typingtrainer.service.email.token.EmailConfirmationToken;
-import by.yankavets.typingtrainer.service.email.token.PasswordResetToken;
+import by.yankavets.typingtrainer.model.entity.token.EmailConfirmationToken;
+import by.yankavets.typingtrainer.model.entity.token.PasswordResetToken;
 
+import java.util.List;
 import java.util.Optional;
 
 
 public interface UserService {
+
+    List<UserDto> findAll();
     Optional<User> findByEmail(String email);
 
-    void save(User registeredUser);
+    User save(User registeredUser);
 
-    int enableUser(String email);
+    void enableUser(String email);
 
     void saveConfirmationToken(EmailConfirmationToken token);
     Optional<EmailConfirmationToken> findEmailToken(String token);
@@ -23,4 +27,8 @@ public interface UserService {
     Optional<PasswordResetToken> findPasswordResetToken(String token);
 
     void setResetAt(String token);
+
+    boolean isEnabled(String email);
+
+    User findById(long id);
 }
