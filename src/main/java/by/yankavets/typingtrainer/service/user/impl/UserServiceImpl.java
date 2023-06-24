@@ -46,15 +46,19 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public User findById(long id) {
         User foundUser = userRepository.findById(id).orElseThrow(
-                (() -> new UserNotFoundException(id)
+                (() -> new UserNotFoundException(ExceptionMessage.NO_USER_WITH_SUCH_ID)
         ));
         return foundUser;
     }
 
 
     @Override
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public User findByEmail(String email) {
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(
+                        () -> new UserNotFoundException(ExceptionMessage.NO_USER_WITH_SUCH_EMAIL)
+                );
     }
 
     @Override

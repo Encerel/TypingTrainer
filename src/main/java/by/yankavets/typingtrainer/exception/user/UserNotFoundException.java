@@ -2,9 +2,19 @@ package by.yankavets.typingtrainer.exception.user;
 
 public class UserNotFoundException extends RuntimeException {
 
-    private static final String MESSAGE_WITH_ID = "User with ID %d not found";
+    public UserNotFoundException() {
+        super();
+    }
 
-    public UserNotFoundException(long id) {
-        super(String.format(MESSAGE_WITH_ID, id));
+    public UserNotFoundException(String message) {
+        super(message);
+    }
+
+    public UserNotFoundException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public UserNotFoundException(Throwable cause) {
+        super(cause);
     }
 }

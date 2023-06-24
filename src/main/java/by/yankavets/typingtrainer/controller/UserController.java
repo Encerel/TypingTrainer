@@ -2,8 +2,11 @@ package by.yankavets.typingtrainer.controller;
 
 import by.yankavets.typingtrainer.mapper.UserMapper;
 import by.yankavets.typingtrainer.model.dto.UserDto;
+import by.yankavets.typingtrainer.model.entity.payload.ServerResponse;
+import by.yankavets.typingtrainer.model.entity.user.User;
 import by.yankavets.typingtrainer.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,18 +36,12 @@ public class UserController {
     ) {
         return userMapper.toDto(userService.findById(id));
     }
-//
-//    @GetMapping("/search")
-//    public ResponseEntity<ServerResponse> findByEmail(
-//            @RequestParam("email") String email
-//    ) {
-//        return userService.findByEmail(email);
-//    }
-//
-//    @GetMapping("/activate")
-//    public ResponseEntity<ServerResponse> enableUser(
-//            @RequestParam("email") String email
-//    ) {
-//        return userService.enableUser(email);
-//    }
+
+    @GetMapping("/search")
+    public UserDto findByEmail(
+            @RequestParam("email") String email
+    ) {
+        return userMapper.toDto(userService.findByEmail(email));
+    }
+
 }

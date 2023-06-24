@@ -84,9 +84,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public ResponseEntity<ServerResponse> register(SignUpDto signUpDTO) {
 
 
-        Optional<User> userFromDb = userService.findByEmail(signUpDTO.getEmail());
+        User userFromDb = userService.findByEmail(signUpDTO.getEmail());
 
-        if (userFromDb.isPresent()) {
+        if (userFromDb != null) {
             throw new UserIsAlreadyExistException(signUpDTO.getEmail());
         }
 
@@ -128,19 +128,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             return ResponseEntity.ok(serverResponse);
         }
 
-        Optional<User> userFromDB = userService.findByEmail(authentication.getName());
-
-        if (userFromDB.isEmpty()) {
-            throw new UsernameNotFoundException(ExceptionMessage.NO_USER_WITH_SUCH_EMAIL);
-        }
-
-        User foundUser = userFromDB.get();
+        User userFromDB = userService.findByEmail(authentication.getName());
 
         serverResponse = AuthenticationResponse
                 .builder()
-                .userDTO(userMapper.toDto(foundUser))
+                .userDTO(userMapper.toDto(userFromDB))
                 .status(HttpStatus.OK.value())
-                .jwtToken(jwtServiceImpl.generateToken(foundUser))
+                .jwtToken(jwtServiceImpl.generateToken(userFromDB))
                 .build();
 
 
@@ -192,28 +186,22 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new IncorrectCredentialsException(ExceptionMessage.WRONG_EMAIL);
         }
 
-        Optional<User> optionalUser = userService.findByEmail(email);
-
-        if (optionalUser.isEmpty()) {
-            throw new UsernameNotFoundException("User with such email does not exist!");
-        }
-        User user = optionalUser.get();
+        User userFromDB = userService.findByEmail(email);
 
         EmailService emailService = new PasswordResetService(mailSender);
 
         String token = UUID.randomUUID().toString();
 
         emailService.send(email, emailService.composeLetter(
-                user.getName(),
+                userFromDB.getName(),
                 token
         ));
-
 
         PasswordResetToken resetToken = PasswordResetToken.builder()
                 .token(token)
                 .createdAt(LocalDateTime.now())
                 .expiresAt(LocalDateTime.now().plusMinutes(15))
-                .user(user)
+                .user(userFromDB)
                 .build();
 
         userService.savePasswordResetToken(resetToken);

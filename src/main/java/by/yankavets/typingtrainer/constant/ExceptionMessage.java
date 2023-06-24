@@ -4,6 +4,7 @@ public final class ExceptionMessage {
 
 
     public static final String NO_USER_WITH_SUCH_EMAIL = "No user registered with such email!";
+    public static final String NO_USER_WITH_SUCH_ID = "No user registered with such id!";
     public static final String WRONG_PASSWORD_SIGN_IN = "Incorrect password!";
 
     public static final String WRONG_PASSWORD_SIGN_UP = "Password should contain at least 8 character";
@@ -36,7 +37,7 @@ public final class ExceptionMessage {
 
     public static String WRONG_NAME = "Name should contain 2 or more characters!";
 
-    public static String PASSWORD_RESET_TOKEN_WAS_USED = "Данный токен более не действителен!";
+    public static String PASSWORD_RESET_TOKEN_WAS_USED = "This jwt-token is not valid anymore!";
 
 
     private ExceptionMessage(){}
