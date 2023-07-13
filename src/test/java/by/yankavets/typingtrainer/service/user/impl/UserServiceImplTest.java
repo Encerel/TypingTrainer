@@ -100,8 +100,7 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("Find user by email")
     void findUserByEmail() {
-        var foundUser = Optional.of(TEST_USER);
-        when(userService.findByEmail(TEST_USER_EMAIL)).thenReturn(foundUser);
+        when(userService.findByEmail(TEST_USER_EMAIL)).thenReturn(TEST_USER);
         var actualByEmail = userService.findByEmail(TEST_USER_EMAIL);
         assertThat(TEST_USER).isEqualTo(actualByEmail);
         verify(userRepository).findByEmail(TEST_USER_EMAIL);

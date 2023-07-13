@@ -85,10 +85,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Transactional
     public ResponseEntity<ServerResponse> register(SignUpDto signUpDTO) {
 
-
-        Optional<User> userFromDb = userService.findByEmail(signUpDTO.getEmail());
-
-        if (userFromDb.isPresent()) {
+        if (userService.isExist(signUpDTO.getEmail())) {
             throw new UserIsAlreadyExistException(signUpDTO.getEmail());
         }
 
@@ -130,17 +127,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             return ResponseEntity.ok(serverResponse);
         }
 
-        Optional<User> userFromDB = userService.findByEmail(authentication.getName());
-
-        if (userFromDB.isEmpty()) {
-            throw new UserNotFoundException(ExceptionMessage.NO_USER_WITH_SUCH_EMAIL);
-        }
+        User userFromDB = userService.findByEmail(authentication.getName());
 
         serverResponse = AuthenticationResponse
                 .builder()
-                .userDTO(userMapper.toDto(userFromDB.get()))
+                .userDTO(userMapper.toDto(userFromDB))
                 .status(HttpStatus.OK.value())
-                .jwtToken(jwtServiceImpl.generateToken(userFromDB.get()))
+                .jwtToken(jwtServiceImpl.generateToken(userFromDB))
                 .build();
 
 
@@ -192,18 +185,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new IncorrectCredentialsException(ExceptionMessage.WRONG_EMAIL);
         }
 
-        Optional<User> userFromDB = userService.findByEmail(email);
-
-        if (userFromDB.isEmpty()) {
-            throw new UserNotFoundException(ExceptionMessage.NO_USER_WITH_SUCH_EMAIL);
-        }
+        User userFromDB = userService.findByEmail(email);
 
         EmailService emailService = new PasswordResetService(mailSender);
 
         String token = UUID.randomUUID().toString();
 
         emailService.send(email, emailService.composeLetter(
-                userFromDB.get().getName(),
+                userFromDB.getName(),
                 token
         ));
 
@@ -211,7 +200,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .token(token)
                 .createdAt(LocalDateTime.now())
                 .expiresAt(LocalDateTime.now().plusMinutes(15))
-                .user(userFromDB.get())
+                .user(userFromDB)
                 .build();
 
         userService.savePasswordResetToken(resetToken);

@@ -54,10 +54,17 @@ public class UserServiceImpl implements UserService {
         return foundUser;
     }
 
+    @Override
+    public boolean isExist(String email) {
+        return userRepository.findByEmail(email).isPresent();
+    }
+
 
     @Override
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(
+                () -> new UserNotFoundException(ExceptionMessage.NO_USER_WITH_SUCH_EMAIL, email)
+        );
     }
 
     @Override
@@ -115,7 +122,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public boolean isEnabled(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(
-                () -> new UsernameNotFoundException(ExceptionMessage.NO_USER_WITH_SUCH_EMAIL)
+                () -> new UserNotFoundException(ExceptionMessage.NO_USER_WITH_SUCH_EMAIL, email)
         );
         return user.isEnabled();
     }

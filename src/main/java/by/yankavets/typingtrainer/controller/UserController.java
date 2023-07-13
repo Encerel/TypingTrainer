@@ -45,9 +45,6 @@ public class UserController {
     ) {
         return userMapper.toDto(
                 userService.findByEmail(email)
-                        .orElseThrow(
-                                () -> new UserNotFoundException(ExceptionMessage.NO_USER_WITH_SUCH_EMAIL)
-                        )
         );
     }
 

@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface UserService {
 
     List<UserDto> findAll();
-    Optional<User> findByEmail(String email);
+    User findByEmail(String email);
 
     User save(User registeredUser);
 
@@ -31,4 +31,6 @@ public interface UserService {
     boolean isEnabled(String email);
 
     User findById(long id);
+
+    boolean isExist(String email);
 }

@@ -3,7 +3,7 @@ package by.yankavets.typingtrainer.constant;
 public final class ExceptionMessage {
 
 
-    public static final String NO_USER_WITH_SUCH_EMAIL = "No user registered with such email!";
+    public static final String NO_USER_WITH_SUCH_EMAIL = "No user registered with %s email!";
     public static final String NO_USER_WITH_SUCH_ID = "No user registered with such id!";
     public static final String WRONG_PASSWORD_SIGN_IN = "Incorrect password!";
 
