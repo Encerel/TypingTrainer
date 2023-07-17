@@ -34,12 +34,9 @@ public class User implements UserDetails {
     private long id;
 
     @Column(name = "name")
-    @NotEmpty
     private String name;
 
     @Column(name = "email")
-    @Email(message = "Incorrect email")
-    @NotEmpty(message = "Email should not be empty")
     private String email;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -49,7 +46,6 @@ public class User implements UserDetails {
     private Set<Role> roles;
 
     @Column(name = "password")
-    @NotEmpty(message = "Password should not be empty")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 

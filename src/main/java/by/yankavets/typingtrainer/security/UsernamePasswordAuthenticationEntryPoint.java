@@ -20,10 +20,9 @@ public class UsernamePasswordAuthenticationEntryPoint implements AuthenticationE
     private static final String ERROR_FIELD = "error";
     private static final String MESSAGE_FIELD = "message";
     private static final String PATH_FIELD = "path";
-
     private static final String UNAUTHORIZED = "Unauthorized";
 
-    private static final String MESSAGE = "Invalid Email or Password!";
+
 
     @Override
     public void commence(
@@ -40,6 +39,5 @@ public class UsernamePasswordAuthenticationEntryPoint implements AuthenticationE
         body.put(STATUS_FIELD, HttpServletResponse.SC_UNAUTHORIZED);
         final ObjectMapper mapper = new ObjectMapper();
         mapper.writeValue(response.getOutputStream(), body);
-
     }
 }

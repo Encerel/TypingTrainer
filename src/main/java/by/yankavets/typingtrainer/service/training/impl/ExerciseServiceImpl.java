@@ -4,34 +4,24 @@ import by.yankavets.typingtrainer.constant.ExceptionMessage;
 import by.yankavets.typingtrainer.constant.Message;
 import by.yankavets.typingtrainer.exception.TrainingDataException;
 import by.yankavets.typingtrainer.mapper.ExerciseMapper;
-import by.yankavets.typingtrainer.mapper.LessonMapper;
-import by.yankavets.typingtrainer.mapper.UserMapper;
-import by.yankavets.typingtrainer.model.dto.UserDto;
-import by.yankavets.typingtrainer.model.dto.UserExerciseFoundDto;
-import by.yankavets.typingtrainer.model.entity.user.User;
-import by.yankavets.typingtrainer.service.training.LessonService;
 import by.yankavets.typingtrainer.model.dto.ExerciseDto;
-import by.yankavets.typingtrainer.model.entity.training.Exercise;
-import by.yankavets.typingtrainer.model.entity.training.Lesson;
 import by.yankavets.typingtrainer.model.entity.payload.ServerResponse;
 import by.yankavets.typingtrainer.model.entity.payload.response.MessageServerResponse;
+import by.yankavets.typingtrainer.model.entity.training.Exercise;
+import by.yankavets.typingtrainer.model.entity.training.Lesson;
+import by.yankavets.typingtrainer.model.entity.user.User;
 import by.yankavets.typingtrainer.repository.ExerciseRepository;
 import by.yankavets.typingtrainer.service.training.ExerciseService;
+import by.yankavets.typingtrainer.service.training.LessonService;
 import by.yankavets.typingtrainer.service.user.UserService;
 import jakarta.persistence.EntityManager;
-import org.hibernate.Hibernate;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)

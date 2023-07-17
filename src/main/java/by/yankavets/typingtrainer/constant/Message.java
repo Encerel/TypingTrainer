@@ -29,6 +29,7 @@ public final class Message {
     public static final String ALL_EXCERPTS_HAVE_ADDED = "All excerpts have added!";
     public static final String EXERCISES_HAVE_CREATED = "Exercises have created successfully!";
 
+
     private Message() {
     }
 }

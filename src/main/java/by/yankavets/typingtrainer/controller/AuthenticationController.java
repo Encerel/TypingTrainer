@@ -5,6 +5,7 @@ import by.yankavets.typingtrainer.model.dto.ResetPasswordDto;
 import by.yankavets.typingtrainer.model.entity.payload.ServerResponse;
 import by.yankavets.typingtrainer.service.security.AuthenticationService;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -25,7 +26,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ServerResponse> registration(@RequestBody SignUpDto signUpDTO) {
+    public ResponseEntity<ServerResponse> registration(@Valid @RequestBody SignUpDto signUpDTO) {
         return authenticationService.register(signUpDTO);
     }
 

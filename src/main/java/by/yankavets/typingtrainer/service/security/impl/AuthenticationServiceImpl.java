@@ -3,38 +3,36 @@ package by.yankavets.typingtrainer.service.security.impl;
 import by.yankavets.typingtrainer.constant.ExceptionMessage;
 import by.yankavets.typingtrainer.constant.Message;
 import by.yankavets.typingtrainer.exception.auth.*;
-import by.yankavets.typingtrainer.exception.user.UserNotFoundException;
 import by.yankavets.typingtrainer.mapper.UserMapper;
-import by.yankavets.typingtrainer.model.dto.SignUpDto;
 import by.yankavets.typingtrainer.model.dto.ResetPasswordDto;
+import by.yankavets.typingtrainer.model.dto.SignUpDto;
+import by.yankavets.typingtrainer.model.entity.payload.ServerResponse;
+import by.yankavets.typingtrainer.model.entity.payload.response.AuthenticationResponse;
+import by.yankavets.typingtrainer.model.entity.payload.response.MessageServerResponse;
+import by.yankavets.typingtrainer.model.entity.token.EmailConfirmationToken;
+import by.yankavets.typingtrainer.model.entity.token.PasswordResetToken;
 import by.yankavets.typingtrainer.model.entity.training.Course;
 import by.yankavets.typingtrainer.model.entity.training.Exercise;
 import by.yankavets.typingtrainer.model.entity.training.Lesson;
 import by.yankavets.typingtrainer.model.entity.user.RoleName;
 import by.yankavets.typingtrainer.model.entity.user.User;
-import by.yankavets.typingtrainer.model.entity.payload.ServerResponse;
-import by.yankavets.typingtrainer.model.entity.payload.response.AuthenticationResponse;
-import by.yankavets.typingtrainer.model.entity.payload.response.MessageServerResponse;
 import by.yankavets.typingtrainer.repository.RoleRepository;
 import by.yankavets.typingtrainer.security.impl.JwtServiceImpl;
 import by.yankavets.typingtrainer.service.email.EmailService;
 import by.yankavets.typingtrainer.service.email.impl.EmailConfirmationService;
 import by.yankavets.typingtrainer.service.email.impl.PasswordResetService;
-import by.yankavets.typingtrainer.model.entity.token.PasswordResetToken;
+import by.yankavets.typingtrainer.service.security.AuthenticationService;
 import by.yankavets.typingtrainer.service.training.CourseService;
 import by.yankavets.typingtrainer.service.training.ExerciseService;
 import by.yankavets.typingtrainer.service.training.LessonService;
 import by.yankavets.typingtrainer.service.user.UserService;
-import by.yankavets.typingtrainer.service.security.AuthenticationService;
-import by.yankavets.typingtrainer.model.entity.token.EmailConfirmationToken;
-import by.yankavets.typingtrainer.validator.UserValidator;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -83,13 +81,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     @Transactional
-    public ResponseEntity<ServerResponse> register(SignUpDto signUpDTO) {
+    public ResponseEntity<ServerResponse> register(@Valid SignUpDto signUpDTO) {
 
         if (userService.isExist(signUpDTO.getEmail())) {
             throw new UserIsAlreadyExistException(signUpDTO.getEmail());
         }
-
-        UserValidator.validate(signUpDTO);
 
         User registeredUser = buildUserEntity(signUpDTO);
         User savedUser = userService.save(registeredUser);
