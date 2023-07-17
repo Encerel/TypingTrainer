@@ -27,8 +27,6 @@ public class SecurityConfiguration {
     private final AuthenticationEntryPoint authenticationEntryPoint;
 
 
-
-
     @Autowired
     public SecurityConfiguration(JwtTokenValidatorFilter jwtTokenValidatorFilter,
                                  AuthenticationEntryPoint authenticationEntryPoint) {
@@ -39,11 +37,11 @@ public class SecurityConfiguration {
 
 
     @Bean
-    AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    AuthenticationManager authenticationManager(
+            AuthenticationConfiguration authenticationConfiguration
+    ) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
-
-
 
 
     @Bean
@@ -72,7 +70,7 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder () {
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 

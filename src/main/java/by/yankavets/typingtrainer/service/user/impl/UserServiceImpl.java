@@ -4,15 +4,14 @@ import by.yankavets.typingtrainer.constant.ExceptionMessage;
 import by.yankavets.typingtrainer.exception.user.UserNotFoundException;
 import by.yankavets.typingtrainer.mapper.UserMapper;
 import by.yankavets.typingtrainer.model.dto.UserDto;
+import by.yankavets.typingtrainer.model.entity.token.EmailConfirmationToken;
+import by.yankavets.typingtrainer.model.entity.token.PasswordResetToken;
 import by.yankavets.typingtrainer.model.entity.user.User;
 import by.yankavets.typingtrainer.repository.EmailConfirmationTokenRepository;
 import by.yankavets.typingtrainer.repository.PasswordResetTokenRepository;
 import by.yankavets.typingtrainer.repository.UserRepository;
-import by.yankavets.typingtrainer.model.entity.token.EmailConfirmationToken;
-import by.yankavets.typingtrainer.model.entity.token.PasswordResetToken;
 import by.yankavets.typingtrainer.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
