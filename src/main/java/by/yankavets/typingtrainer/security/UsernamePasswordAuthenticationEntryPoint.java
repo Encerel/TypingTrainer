@@ -15,14 +15,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class UsernamePasswordAuthenticationEntryPoint implements AuthenticationEntryPoint {
+public class UsernamePasswordAuthenticationEntryPoint
+        implements AuthenticationEntryPoint {
     private static final String STATUS_FIELD = "status";
     private static final String ERROR_FIELD = "error";
     private static final String MESSAGE_FIELD = "message";
     private static final String PATH_FIELD = "path";
     private static final String UNAUTHORIZED = "Unauthorized";
-
-
 
     @Override
     public void commence(

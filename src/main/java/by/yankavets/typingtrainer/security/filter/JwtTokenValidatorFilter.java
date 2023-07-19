@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -80,7 +81,7 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
                 String json = JsonErrorWriter.JSON_WRITER.writeValueAsString(serverResponse);
 
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType("application/json; charset=UTF-8");
+                response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
                 response.getWriter().write(json);
 
             }
